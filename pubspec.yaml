@@ -52,7 +52,7 @@ dependencies:
 
   # Background & Offline
   sqflite: ^2.3.0
-  workmanager: ^0.5.2
+  workmanager: ^0.9.0
 
   # Misc
   equatable: ^2.0.7
