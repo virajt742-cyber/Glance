@@ -1,0 +1,173 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─── Helper Functions ─────────────────────────────────────────────
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isGroupMember(groupId) {
+      return isAuthenticated() &&
+        exists(/databases/$(database)/documents/groups/$(groupId)) &&
+        request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.memberIds;
+    }
+
+    function incomingData() {
+      return request.resource.data;
+    }
+
+    function existingData() {
+      return resource.data;
+    }
+
+    // Only allow specific fields to be written
+    function hasOnlyFields(fields) {
+      return incomingData().keys().hasOnly(fields);
+    }
+
+    // ─── Users Collection ─────────────────────────────────────────────
+    match /users/{userId} {
+      // Users can read any profile if authenticated (to show name/avatar in group)
+      allow read: if isAuthenticated();
+
+      // Users can create their own profile with valid fields
+      allow create: if isOwner(userId)
+        && hasOnlyFields(['id', 'displayName', 'email', 'profilePicUrl', 'pushToken', 'createdAt', 'blockedUsers'])
+        && incomingData().displayName is string
+        && incomingData().email is string
+        && incomingData().displayName.size() >= 1
+        && incomingData().displayName.size() <= 50
+        && incomingData().email.size() >= 5;
+
+      // Users can update only their own profile, restricted fields
+      allow update: if isOwner(userId)
+        && hasOnlyFields(['id', 'displayName', 'email', 'profilePicUrl', 'pushToken', 'createdAt', 'blockedUsers'])
+        // Prevent changing the id or email after creation
+        && incomingData().id == existingData().id
+        && incomingData().email == existingData().email
+        && incomingData().createdAt == existingData().createdAt;
+
+      // Users cannot delete their profile (admin only via Cloud Functions)
+      allow delete: if false;
+    }
+
+    // ─── Groups Collection ────────────────────────────────────────────
+    match /groups/{groupId} {
+      // Only members can read group data
+      allow read: if isAuthenticated()
+        && request.auth.uid in resource.data.memberIds;
+
+      // Authenticated users can create groups (they must be in memberIds as creator)
+      allow create: if isAuthenticated()
+        && hasOnlyFields(['id', 'name', 'creatorId', 'inviteCode', 'memberIds', 'createdAt'])
+        && incomingData().creatorId == request.auth.uid
+        && request.auth.uid in incomingData().memberIds
+        && incomingData().name is string
+        && incomingData().name.size() >= 1
+        && incomingData().name.size() <= 100
+        && incomingData().memberIds is list
+        && incomingData().memberIds.size() >= 1
+        && incomingData().memberIds.size() <= 50;
+
+      // Only members can update, or a new user joining the group by adding themselves
+      allow update: if isAuthenticated()
+        && (
+          (request.auth.uid in existingData().memberIds)
+          ||
+          (
+            request.auth.uid in incomingData().memberIds
+            && incomingData().memberIds.size() == existingData().memberIds.size() + 1
+            && incomingData().name == existingData().name
+            && incomingData().creatorId == existingData().creatorId
+            && incomingData().createdAt == existingData().createdAt
+            && incomingData().inviteCode == existingData().inviteCode
+            && incomingData().id == existingData().id
+          )
+        );
+
+      // Only creator can delete
+      allow delete: if isAuthenticated()
+        && existingData().creatorId == request.auth.uid;
+    }
+
+    // ─── Photos Collection ────────────────────────────────────────────
+    match /photos/{photoId} {
+      // Only group members can read photos
+      allow read: if isAuthenticated()
+        && isGroupMember(resource.data.groupId);
+
+      // Only group members can create photos
+      allow create: if isAuthenticated()
+        && isGroupMember(incomingData().groupId)
+        && incomingData().senderId == request.auth.uid
+        && hasOnlyFields(['id', 'groupId', 'senderId', 'storageUrl', 'localTimestamp', 'caption', 'reactionEmojiMap'])
+        && incomingData().storageUrl is string
+        && incomingData().storageUrl.size() > 0
+        && incomingData().caption is string
+        && incomingData().caption.size() <= 500;
+
+      // Only group members can update (for reactions)
+      // Only reactionEmojiMap can change after creation
+      allow update: if isAuthenticated()
+        && isGroupMember(existingData().groupId)
+        && incomingData().id == existingData().id
+        && incomingData().groupId == existingData().groupId
+        && incomingData().senderId == existingData().senderId
+        && incomingData().storageUrl == existingData().storageUrl
+        && incomingData().localTimestamp == existingData().localTimestamp
+        && incomingData().caption == existingData().caption;
+
+      // Only sender can delete their own photos
+      allow delete: if isAuthenticated()
+        && existingData().senderId == request.auth.uid;
+    }
+
+    // ─── Invites Collection ───────────────────────────────────────────
+    match /invites/{inviteId} {
+      // Anyone authenticated can read an invite (to validate codes)
+      allow read: if isAuthenticated();
+
+      // Only group members can create invites for their group
+      allow create: if isAuthenticated()
+        && isGroupMember(incomingData().groupId)
+        && hasOnlyFields(['id', 'inviteCode', 'groupId', 'expiresAt', 'status', 'createdBy', 'createdAt'])
+        && incomingData().createdBy == request.auth.uid
+        && incomingData().status == 'active'
+        && incomingData().inviteCode is string
+        && incomingData().inviteCode.size() == 6;
+
+      // Anyone authenticated can mark an active invite as used when joining a group
+      allow update: if isAuthenticated()
+        && existingData().status == 'active'
+        && incomingData().status == 'used'
+        && incomingData().id == existingData().id
+        && incomingData().inviteCode == existingData().inviteCode
+        && incomingData().groupId == existingData().groupId
+        && incomingData().expiresAt == existingData().expiresAt
+        && incomingData().createdBy == existingData().createdBy
+        && incomingData().createdAt == existingData().createdAt;
+
+      // Only creator can delete
+      allow delete: if isAuthenticated()
+        && existingData().createdBy == request.auth.uid;
+    }
+
+    // ─── Reports Collection ───────────────────────────────────────────
+    match /reports/{reportId} {
+      allow create: if isAuthenticated()
+        && incomingData().reportedBy == request.auth.uid;
+      allow read, update, delete: if false;
+    }
+
+    // ─── Deny all other collections ───────────────────────────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

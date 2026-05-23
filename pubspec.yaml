@@ -1,0 +1,94 @@
+name: glance_app
+description: "Glance — Share moments instantly with your closest circle. A Locket Widget clone."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Firebase
+  firebase_core: ^3.8.0
+  firebase_auth: ^5.5.0
+  cloud_firestore: ^5.6.0
+  firebase_storage: ^12.4.0
+  firebase_messaging: ^15.2.0
+  firebase_analytics: ^11.5.0
+
+  # State Management
+  flutter_riverpod: ^2.6.1
+  riverpod_annotation: ^2.6.1
+
+  # Camera & Media
+  camera: ^0.11.0+2
+  image_picker: ^1.1.2
+  flutter_image_compress: ^2.3.0
+  cached_network_image: ^3.4.1
+  photo_view: ^0.15.0
+
+  # UI & Design
+  google_fonts: ^6.2.1
+  flutter_animate: ^4.5.0
+  shimmer: ^3.0.0
+  gap: ^3.0.1
+  icons_plus: ^5.0.0
+  flutter_svg: ^2.0.10+1
+
+  # Utilities
+  uuid: ^4.5.1
+  intl: ^0.19.0
+  timeago: ^3.7.0
+  share_plus: ^10.1.4
+  permission_handler: ^11.3.1
+  path_provider: ^2.1.5
+  path: ^1.9.0
+  home_widget: ^0.7.0
+
+  # Navigation
+  go_router: ^14.8.1
+
+  # Background & Offline
+  sqflite: ^2.3.0
+  workmanager: ^0.5.2
+
+  # Misc
+  equatable: ^2.0.7
+  json_annotation: ^4.9.0
+  freezed_annotation: 2.4.4
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  build_runner: ^2.4.13
+  json_serializable: ^6.9.0
+  freezed: ^2.5.7
+  riverpod_generator: ^2.6.2
+  flutter_launcher_icons: ^0.13.1
+  flutter_native_splash: ^2.4.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+    - assets/icons/
+
+
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/app_icon.png"
+  adaptive_icon_background: "#0A0A0A"
+  adaptive_icon_foreground: "assets/images/app_icon_foreground.png"
+
+flutter_native_splash:
+  color: "#0A0A0A"
+  image: "assets/images/splash.png"
+  android_12:
+    color: "#0A0A0A"
+    image: "assets/images/splash.png"

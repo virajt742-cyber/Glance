@@ -1,0 +1,73 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // ─── Helper Functions ─────────────────────────────────────────────
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Check file size (max 10MB for photos)
+    function isValidPhotoSize() {
+      return request.resource.size < 10 * 1024 * 1024;
+    }
+
+    // Check content type is image
+    function isImageContentType() {
+      return request.resource.contentType.matches('image/.*');
+    }
+
+    // ─── User Profile Pictures ────────────────────────────────────────
+    // Path: /users/{userId}/profile/{filename}
+    match /users/{userId}/profile/{fileName} {
+      // Only the user can upload their own profile picture
+      allow write: if isOwner(userId)
+        && isValidPhotoSize()
+        && isImageContentType();
+
+      // Anyone authenticated can read profile pictures (for displaying in groups)
+      allow read: if isAuthenticated();
+    }
+
+    // ─── Group Photos ─────────────────────────────────────────────────
+    // Path: /groups/{groupId}/photos/{userId}/{filename}
+    // The userId in the path ensures users can only upload to their own folder
+    match /groups/{groupId}/photos/{userId}/{fileName} {
+      // Users can only upload to their own folder within a group
+      // Group membership is verified at the Firestore document level
+      // The senderId in the photo document must match the uploader
+      allow write: if isOwner(userId)
+        && isValidPhotoSize()
+        && isImageContentType();
+
+      // Any authenticated user can read group photos
+      // Fine-grained group membership check happens at Firestore query level
+      // Storage rules can't easily cross-reference Firestore docs,
+      // so we use the path structure to enforce ownership on writes
+      // and rely on Firestore rules to prevent unauthorized photo document reads
+      allow read: if isAuthenticated();
+    }
+
+    // ─── Group Thumbnails (for widgets) ───────────────────────────────
+    // Path: /groups/{groupId}/thumbnails/{filename}
+    match /groups/{groupId}/thumbnails/{fileName} {
+      // Only authenticated users can write thumbnails
+      allow write: if isAuthenticated()
+        && isValidPhotoSize()
+        && isImageContentType();
+
+      // Readable by authenticated users
+      allow read: if isAuthenticated();
+    }
+
+    // ─── Deny all other paths ─────────────────────────────────────────
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

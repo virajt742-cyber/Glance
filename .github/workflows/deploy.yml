@@ -1,0 +1,43 @@
+name: Glance Build & Deploy
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build_and_test:
+    name: Build and Test Flutter App
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          flutter-version: '3.19.0'
+          
+      - name: Install Dependencies
+        run: flutter pub get
+        
+      - name: Analyze Code
+        run: flutter analyze
+        
+      - name: Run Tests
+        run: flutter test
+        
+      - name: Build Android APK
+        run: flutter build apk --release
+        
+      - name: Upload Android APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: glance-android-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+
+      - name: Build Android AppBundle
+        run: flutter build appbundle --release
+        
+      - name: Build iOS IPA
+        run: flutter build ipa --release --no-codesign

@@ -1,0 +1,335 @@
+[
+  {
+    "name": "build_or_update_graph_tool",
+    "description": "Build or incrementally update the code knowledge graph.\n\nCall this first to initialize the graph, or after making changes.\nBy default performs an incremental update (only changed files).\nSet full_rebuild=True to re-parse every file.\n\nArgs:\n    full_rebuild: If True, re-parse all files. Default: False (incremental).\n    repo_root: Repository root path. Auto-detected from current directory if omitted.\n    base: Git ref to diff against for incremental updates. Default: HEAD~1.\n",
+    "inputSchema": {
+      "properties": {
+        "full_rebuild": {
+          "default": false,
+          "title": "Full Rebuild",
+          "type": "boolean"
+        },
+        "repo_root": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Repo Root"
+        },
+        "base": {
+          "default": "HEAD~1",
+          "title": "Base",
+          "type": "string"
+        }
+      },
+      "title": "build_or_update_graph_toolArguments",
+      "type": "object"
+    }
+  },
+  {
+    "name": "get_impact_radius_tool",
+    "description": "Analyze the blast radius of changed files in the codebase.\n\nShows which functions, classes, and files are impacted by changes.\nAuto-detects changed files from git if not specified.\n\nArgs:\n    changed_files: List of changed file paths (relative to repo root). Auto-detected if omitted.\n    max_depth: Number of hops to traverse in the dependency graph. Default: 2.\n    repo_root: Repository root path. Auto-detected if omitted.\n    base: Git ref for auto-detecting changes. Default: HEAD~1.\n",
+    "inputSchema": {
+      "properties": {
+        "changed_files": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Changed Files"
+        },
+        "max_depth": {
+          "default": 2,
+          "title": "Max Depth",
+          "type": "integer"
+        },
+        "repo_root": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Repo Root"
+        },
+        "base": {
+          "default": "HEAD~1",
+          "title": "Base",
+          "type": "string"
+        }
+      },
+      "title": "get_impact_radius_toolArguments",
+      "type": "object"
+    }
+  },
+  {
+    "name": "query_graph_tool",
+    "description": "Run a predefined graph query to explore code relationships.\n\nAvailable patterns:\n- callers_of: Find functions that call the target\n- callees_of: Find functions called by the target\n- imports_of: Find what the target imports\n- importers_of: Find files that import the target\n- children_of: Find nodes contained in a file or class\n- tests_for: Find tests for the target\n- inheritors_of: Find classes inheriting from the target\n- file_summary: Get all nodes in a file\n\nArgs:\n    pattern: Query pattern name (see above).\n    target: Node name, qualified name, or file path to query.\n    repo_root: Repository root path. Auto-detected if omitted.\n",
+    "inputSchema": {
+      "properties": {
+        "pattern": {
+          "title": "Pattern",
+          "type": "string"
+        },
+        "target": {
+          "title": "Target",
+          "type": "string"
+        },
+        "repo_root": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Repo Root"
+        }
+      },
+      "required": [
+        "pattern",
+        "target"
+      ],
+      "title": "query_graph_toolArguments",
+      "type": "object"
+    }
+  },
+  {
+    "name": "get_review_context_tool",
+    "description": "Generate a focused, token-efficient review context for code changes.\n\nCombines impact analysis with source snippets and review guidance.\nUse this for comprehensive code reviews.\n\nArgs:\n    changed_files: Files to review. Auto-detected from git diff if omitted.\n    max_depth: Impact radius depth. Default: 2.\n    include_source: Include source code snippets. Default: True.\n    max_lines_per_file: Max source lines per file. Default: 200.\n    repo_root: Repository root path. Auto-detected if omitted.\n    base: Git ref for change detection. Default: HEAD~1.\n",
+    "inputSchema": {
+      "properties": {
+        "changed_files": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Changed Files"
+        },
+        "max_depth": {
+          "default": 2,
+          "title": "Max Depth",
+          "type": "integer"
+        },
+        "include_source": {
+          "default": true,
+          "title": "Include Source",
+          "type": "boolean"
+        },
+        "max_lines_per_file": {
+          "default": 200,
+          "title": "Max Lines Per File",
+          "type": "integer"
+        },
+        "repo_root": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Repo Root"
+        },
+        "base": {
+          "default": "HEAD~1",
+          "title": "Base",
+          "type": "string"
+        }
+      },
+      "title": "get_review_context_toolArguments",
+      "type": "object"
+    }
+  },
+  {
+    "name": "semantic_search_nodes_tool",
+    "description": "Search for code entities by name, keyword, or semantic similarity.\n\nUses vector embeddings for semantic search when available (run embed_graph_tool\nfirst, requires sentence-transformers). Falls back to keyword matching otherwise.\n\nArgs:\n    query: Search string to match against node names.\n    kind: Optional filter: File, Class, Function, Type, or Test.\n    limit: Maximum results. Default: 20.\n    repo_root: Repository root path. Auto-detected if omitted.\n",
+    "inputSchema": {
+      "properties": {
+        "query": {
+          "title": "Query",
+          "type": "string"
+        },
+        "kind": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Kind"
+        },
+        "limit": {
+          "default": 20,
+          "title": "Limit",
+          "type": "integer"
+        },
+        "repo_root": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Repo Root"
+        }
+      },
+      "required": [
+        "query"
+      ],
+      "title": "semantic_search_nodes_toolArguments",
+      "type": "object"
+    }
+  },
+  {
+    "name": "embed_graph_tool",
+    "description": "Compute vector embeddings for all graph nodes to enable semantic search.\n\nRequires: pip install code-review-graph[embeddings]\nUses the all-MiniLM-L6-v2 model (fast, 384-dim vectors).\nOnly computes embeddings for nodes that don't already have them.\n\nAfter running this, semantic_search_nodes_tool will use vector similarity\ninstead of keyword matching for much better results.\n\nArgs:\n    repo_root: Repository root path. Auto-detected if omitted.\n",
+    "inputSchema": {
+      "properties": {
+        "repo_root": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Repo Root"
+        }
+      },
+      "title": "embed_graph_toolArguments",
+      "type": "object"
+    }
+  },
+  {
+    "name": "list_graph_stats_tool",
+    "description": "Get aggregate statistics about the code knowledge graph.\n\nShows total nodes, edges, languages, files, and last update time.\nUseful for checking if the graph is built and up to date.\n\nArgs:\n    repo_root: Repository root path. Auto-detected if omitted.\n",
+    "inputSchema": {
+      "properties": {
+        "repo_root": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Repo Root"
+        }
+      },
+      "title": "list_graph_stats_toolArguments",
+      "type": "object"
+    }
+  },
+  {
+    "name": "get_docs_section_tool",
+    "description": "Get a specific section from the LLM-optimized documentation reference.\n\nReturns only the requested section content for minimal token usage.\nUse this before answering any user question about the plugin.\n\nAvailable sections: usage, review-delta, review-pr, commands, legal,\nwatch, embeddings, languages, troubleshooting.\n\nArgs:\n    section_name: The section to retrieve (e.g. \"review-delta\", \"usage\").\n",
+    "inputSchema": {
+      "properties": {
+        "section_name": {
+          "title": "Section Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "section_name"
+      ],
+      "title": "get_docs_section_toolArguments",
+      "type": "object"
+    }
+  },
+  {
+    "name": "find_large_functions_tool",
+    "description": "Find functions, classes, or files exceeding a line-count threshold.\n\nUseful for decomposition audits, code quality checks, and enforcing\nsize limits during code review. Results are ordered by line count.\n\nArgs:\n    min_lines: Minimum line count to flag. Default: 50.\n    kind: Optional filter: Function, Class, File, or Test.\n    file_path_pattern: Filter by file path substring (e.g. \"components/\").\n    limit: Maximum results. Default: 50.\n    repo_root: Repository root path. Auto-detected if omitted.\n",
+    "inputSchema": {
+      "properties": {
+        "min_lines": {
+          "default": 50,
+          "title": "Min Lines",
+          "type": "integer"
+        },
+        "kind": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Kind"
+        },
+        "file_path_pattern": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "File Path Pattern"
+        },
+        "limit": {
+          "default": 50,
+          "title": "Limit",
+          "type": "integer"
+        },
+        "repo_root": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Repo Root"
+        }
+      },
+      "title": "find_large_functions_toolArguments",
+      "type": "object"
+    }
+  }
+]
