@@ -59,7 +59,7 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Join request timed out. Please check your network connection.'),
+            content: Text('Join request timed out. Please check your network connection and verify that Cloud Firestore is created and enabled in your Firebase Console.'),
             backgroundColor: GlanceTheme.error,
           ),
         );
@@ -95,9 +95,12 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
       });
     } catch (e) {
       if (mounted) {
+        final isTimeout = e is TimeoutException || e.toString().contains('TimeoutException');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to generate invite code: $e'),
+            content: Text(isTimeout
+                ? 'Failed to generate invite code: Request timed out. Verify that Cloud Firestore is created and enabled in your Firebase Console.'
+                : 'Failed to generate invite code: $e'),
             backgroundColor: GlanceTheme.error,
           ),
         );

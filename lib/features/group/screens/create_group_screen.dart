@@ -78,7 +78,7 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Request timed out. Please check your network connection and try again.'),
+            content: Text('Request timed out. Please check your network connection and verify that Cloud Firestore is created and enabled in your Firebase Console.'),
             backgroundColor: GlanceTheme.error,
           ),
         );

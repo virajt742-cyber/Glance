@@ -270,6 +270,18 @@ class UploadNotifier extends StateNotifier<UploadState> {
       return true;
     } catch (e) {
       final isTimeout = e is TimeoutException || e.toString().contains('TimeoutException');
+      final isObjectNotFound = e.toString().contains('object-not-found') || 
+                               e.toString().contains('ObjectNotFound') ||
+                               e.toString().contains('bucket-not-found');
+      
+      if (isObjectNotFound) {
+        state = state.copyWith(
+          status: UploadStatus.error,
+          errorMessage: 'Firebase Storage bucket not found. Please ensure you have created and enabled Firebase Storage in your Firebase Console (Build > Storage).',
+        );
+        return false;
+      }
+
       final isNetworkError = e.toString().contains('network_error') || 
                              e.toString().contains('offline') || 
                              e.toString().contains('SocketException') ||
