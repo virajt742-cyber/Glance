@@ -180,7 +180,7 @@ class StorageService {
           minHeight: maxHeight,
           quality: quality,
           format: CompressFormat.jpeg,
-        );
+        ).timeout(const Duration(seconds: 4));
         
         if (result == null || result.isEmpty) {
           break; // Fallback to raw bytes below
