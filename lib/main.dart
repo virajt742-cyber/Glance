@@ -64,27 +64,41 @@ Future<void> main() async {
     ));
   }
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    debugPrint('[Firebase] Initialization error: $e');
+  }
 
   // Enable Firestore persistence on Web so .get() can use cached data
   // while the WebSocket connection is being established.
   if (kIsWeb) {
-    FirebaseFirestore.instance.settings = const Settings(
-      persistenceEnabled: true,
-      cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
-    );
+    try {
+      FirebaseFirestore.instance.settings = const Settings(
+        persistenceEnabled: true,
+        cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
+      );
+    } catch (e) {
+      debugPrint('[Firestore] Persistence settings failed: $e');
+    }
   }
 
   // Register background message handler (not supported on web)
   if (!kIsWeb) {
-    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+    try {
+      FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+    } catch (e) {
+      debugPrint('[FCM] Background handler registration failed: $e');
+    }
   }
 
   // Initialize Background Service — Workmanager (native only)
   if (!kIsWeb) {
-    await BackgroundService.initialize();
+    BackgroundService.initialize().catchError((e) {
+      debugPrint('[BackgroundService] Failed to initialize background service: $e');
+    });
   }
 
   runApp(const ProviderScope(child: GlanceApp()));
