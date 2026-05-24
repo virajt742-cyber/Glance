@@ -266,9 +266,15 @@ class _CameraScreenState extends ConsumerState<CameraScreen> with WidgetsBinding
           // ─── Camera Preview ───
           if (_isCameraInitialized && _cameraController != null)
             Positioned.fill(
-              child: AspectRatio(
-                aspectRatio: _cameraController!.value.aspectRatio,
-                child: CameraPreview(_cameraController!),
+              child: ClipRect(
+                child: FittedBox(
+                  fit: BoxFit.cover,
+                  child: SizedBox(
+                    width: 100,
+                    height: 100 / _cameraController!.value.aspectRatio,
+                    child: CameraPreview(_cameraController!),
+                  ),
+                ),
               ),
             )
           else

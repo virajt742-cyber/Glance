@@ -33,7 +33,7 @@ class FirestoreService {
       createdAt: DateTime.now(),
     );
 
-    await docRef.set(group.toCreateJson()).timeout(const Duration(seconds: 8));
+    await docRef.set(group.toCreateJson());
     return group;
   }
 
@@ -153,7 +153,7 @@ class FirestoreService {
       reactionEmojiMap: {},
     );
 
-    await docRef.set(photo.toCreateJson()).timeout(const Duration(seconds: 8));
+    await docRef.set(photo.toCreateJson());
     return photo;
   }
 
@@ -311,7 +311,7 @@ class FirestoreService {
       createdAt: DateTime.now(),
     );
 
-    await docRef.set(invite.toCreateJson()).timeout(const Duration(seconds: 5));
+    await docRef.set(invite.toCreateJson());
     return invite;
   }
 
@@ -322,7 +322,7 @@ class FirestoreService {
         .where('inviteCode', isEqualTo: code.toUpperCase().trim())
         .limit(1)
         .get()
-        .timeout(const Duration(seconds: 5));
+        .timeout(const Duration(seconds: 15));
 
     if (snapshot.docs.isEmpty) return null;
     return InviteModel.fromFirestore(snapshot.docs.first);
@@ -401,7 +401,7 @@ class FirestoreService {
       {'status': 'used'},
     );
 
-    await batch.commit().timeout(const Duration(seconds: 5));
+    await batch.commit().timeout(const Duration(seconds: 20));
 
     // Return updated group
     return group.copyWith(

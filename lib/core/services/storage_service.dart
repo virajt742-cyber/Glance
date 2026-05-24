@@ -48,8 +48,8 @@ class StorageService {
         },
       );
 
-      await ref.putData(compressed, metadata).timeout(const Duration(seconds: 15));
-      return await ref.getDownloadURL().timeout(const Duration(seconds: 10));
+      await ref.putData(compressed, metadata).timeout(const Duration(seconds: 60));
+      return await ref.getDownloadURL().timeout(const Duration(seconds: 20));
     } on FirebaseException catch (e) {
       throw StorageException(
         'Failed to upload photo: ${e.message}',
@@ -82,8 +82,8 @@ class StorageService {
         },
       );
 
-      await ref.putData(imageBytes, metadata).timeout(const Duration(seconds: 15));
-      return await ref.getDownloadURL().timeout(const Duration(seconds: 10));
+      await ref.putData(imageBytes, metadata).timeout(const Duration(seconds: 60));
+      return await ref.getDownloadURL().timeout(const Duration(seconds: 20));
     } on FirebaseException catch (e) {
       throw StorageException(
         'Failed to upload photo: ${e.message}',
@@ -113,8 +113,8 @@ class StorageService {
         customMetadata: {'uploadedBy': userId, 'type': 'profile'},
       );
 
-      await ref.putData(compressed, metadata).timeout(const Duration(seconds: 15));
-      return await ref.getDownloadURL().timeout(const Duration(seconds: 10));
+      await ref.putData(compressed, metadata).timeout(const Duration(seconds: 60));
+      return await ref.getDownloadURL().timeout(const Duration(seconds: 20));
     } on FirebaseException catch (e) {
       throw StorageException(
         'Failed to upload profile photo: ${e.message}',

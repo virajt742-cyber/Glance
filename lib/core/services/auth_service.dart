@@ -77,7 +77,7 @@ class AuthService {
           .collection(AppConstants.usersCollection)
           .doc(user.uid)
           .set(userModel.toCreateJson())
-          .timeout(const Duration(seconds: 8));
+          .timeout(const Duration(seconds: 20));
 
       return userModel;
     } on FirebaseAuthException catch (e) {
@@ -113,7 +113,7 @@ class AuthService {
           .collection(AppConstants.usersCollection)
           .doc(user.uid)
           .get()
-          .timeout(const Duration(seconds: 8));
+          .timeout(const Duration(seconds: 20));
 
       if (!doc.exists || doc.data() == null) {
         // Edge case: Auth exists but Firestore doc is missing — recreate
@@ -129,7 +129,7 @@ class AuthService {
             .collection(AppConstants.usersCollection)
             .doc(user.uid)
             .set(userModel.toCreateJson())
-            .timeout(const Duration(seconds: 8));
+            .timeout(const Duration(seconds: 20));
         return userModel;
       }
 
@@ -164,7 +164,7 @@ class AuthService {
         .doc(firebaseUser.uid);
 
     try {
-      final doc = await docRef.get().timeout(const Duration(seconds: 8));
+      final doc = await docRef.get().timeout(const Duration(seconds: 20));
       if (doc.exists && doc.data() != null) {
         return UserModel.fromFirestore(doc);
       }
@@ -203,7 +203,7 @@ class AuthService {
       pushToken: '',
       createdAt: DateTime.now(),
     );
-    await docRef.set(userModel.toCreateJson()).timeout(const Duration(seconds: 8));
+    await docRef.set(userModel.toCreateJson()).timeout(const Duration(seconds: 20));
     return userModel;
   }
 
