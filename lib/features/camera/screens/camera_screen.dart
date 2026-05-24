@@ -267,27 +267,19 @@ class _CameraScreenState extends ConsumerState<CameraScreen> with WidgetsBinding
           if (_isCameraInitialized && _cameraController != null)
             Positioned.fill(
               child: ClipRect(
-                child: Builder(
-                  builder: (context) {
-                    final screenRatio = size.width / size.height;
-                    final cameraRatio = _cameraController!.value.aspectRatio;
-                    double scale;
-                    if (cameraRatio > 1) {
-                      scale = cameraRatio / screenRatio;
-                    } else {
-                      if (cameraRatio > screenRatio) {
-                        scale = cameraRatio / screenRatio;
-                      } else {
-                        scale = screenRatio / cameraRatio;
-                      }
-                    }
-                    return Transform.scale(
-                      scale: scale,
-                      child: Center(
+                child: FittedBox(
+                  fit: BoxFit.cover,
+                  child: Builder(
+                    builder: (context) {
+                      final cameraRatio = _cameraController!.value.aspectRatio;
+                      final displayRatio = cameraRatio > 1 ? 1 / cameraRatio : cameraRatio;
+                      return SizedBox(
+                        width: size.width,
+                        height: size.width / displayRatio,
                         child: CameraPreview(_cameraController!),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
               ),
             )

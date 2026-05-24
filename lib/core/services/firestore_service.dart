@@ -33,7 +33,7 @@ class FirestoreService {
       createdAt: DateTime.now(),
     );
 
-    await docRef.set(group.toCreateJson());
+    await docRef.set(group.toCreateJson()).timeout(const Duration(seconds: 15));
     return group;
   }
 
@@ -153,7 +153,7 @@ class FirestoreService {
       reactionEmojiMap: {},
     );
 
-    await docRef.set(photo.toCreateJson());
+    await docRef.set(photo.toCreateJson()).timeout(const Duration(seconds: 15));
     return photo;
   }
 
@@ -311,7 +311,7 @@ class FirestoreService {
       createdAt: DateTime.now(),
     );
 
-    await docRef.set(invite.toCreateJson());
+    await docRef.set(invite.toCreateJson()).timeout(const Duration(seconds: 15));
     return invite;
   }
 
