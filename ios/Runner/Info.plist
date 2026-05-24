@@ -26,6 +26,8 @@
 		<true/>
 		<key>NSCameraUsageDescription</key>
 		<string>Glance needs camera access so you can capture moments and send them instantly to your friends' widgets.</string>
+		<key>NSMicrophoneUsageDescription</key>
+		<string>Glance needs microphone access during camera initialization to support photo capture.</string>
 		<key>NSPhotoLibraryUsageDescription</key>
 		<string>Glance needs gallery access to let you select photos for sharing.</string>
 		<key>UILaunchStoryboardName</key>

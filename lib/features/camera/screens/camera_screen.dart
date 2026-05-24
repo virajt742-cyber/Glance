@@ -47,11 +47,13 @@ class _CameraScreenState extends ConsumerState<CameraScreen> with WidgetsBinding
   void didChangeAppLifecycleState(AppLifecycleState state) {
     final CameraController? cameraController = _cameraController;
 
-    if (cameraController == null || !cameraController.value.isInitialized) {
+    if (cameraController == null) {
       return;
     }
 
     if (state == AppLifecycleState.inactive) {
+      _isCameraInitialized = false;
+      _cameraController = null;
       cameraController.dispose();
     } else if (state == AppLifecycleState.resumed) {
       _initCamera(_selectedCameraIndex);
