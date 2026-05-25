@@ -52,6 +52,105 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
+  void _showForgotPasswordDialog() {
+    final emailResetController = TextEditingController(text: _emailController.text);
+    final formKey = GlobalKey<FormState>();
+    bool sendingReset = false;
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          backgroundColor: GlanceTheme.surfaceElevated,
+          title: Text(
+            'Reset Password',
+            style: GlanceTheme.titleLarge.copyWith(color: Colors.white),
+          ),
+          content: Form(
+            key: formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'Enter your email address to receive a password reset link.',
+                  style: GlanceTheme.bodyMedium,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: emailResetController,
+                  style: GlanceTheme.bodyLarge.copyWith(color: Colors.white),
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: const InputDecoration(
+                    labelText: 'Email',
+                    hintText: 'you@example.com',
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Email is required';
+                    }
+                    if (!value.contains('@') || !value.contains('.')) {
+                      return 'Enter a valid email';
+                    }
+                    return null;
+                  },
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: sendingReset ? null : () => Navigator.pop(context),
+              child: Text('Cancel', style: GlanceTheme.bodyLarge.copyWith(color: GlanceTheme.textSecondary)),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: GlanceTheme.primary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(GlanceTheme.radiusMd),
+                ),
+              ),
+              onPressed: sendingReset
+                  ? null
+                  : () async {
+                      if (!formKey.currentState!.validate()) return;
+                      setDialogState(() => sendingReset = true);
+                      try {
+                        final authService = ref.read(authServiceProvider);
+                        await authService.resetPassword(emailResetController.text.trim());
+                        if (context.mounted) {
+                          Navigator.pop(context);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Password reset email sent!'),
+                              backgroundColor: GlanceTheme.success,
+                            ),
+                          );
+                        }
+                      } catch (e) {
+                        setDialogState(() => sendingReset = false);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(e.toString().replaceAll('Exception: ', '')),
+                            backgroundColor: GlanceTheme.error,
+                          ),
+                        );
+                      }
+                    },
+              child: sendingReset
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black),
+                    )
+                  : Text('Send Link', style: GlanceTheme.bodyLarge.copyWith(color: Colors.black, fontWeight: FontWeight.bold)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -147,7 +246,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     return null;
                   },
                 ).animate().fadeIn(delay: 500.ms).slideX(begin: -0.1),
-                const SizedBox(height: 32),
+                const SizedBox(height: 8),
+
+                // Forgot Password Link
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: _showForgotPasswordDialog,
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      minimumSize: const Size(0, 0),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    child: Text(
+                      'Forgot Password?',
+                      style: GlanceTheme.bodyMedium.copyWith(color: GlanceTheme.primary),
+                    ),
+                  ),
+                ).animate().fadeIn(delay: 550.ms),
+                const SizedBox(height: 24),
 
                 // Login button
                 SizedBox(

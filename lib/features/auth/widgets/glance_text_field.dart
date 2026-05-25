@@ -10,6 +10,7 @@ class GlanceTextField extends StatelessWidget {
   final IconData? prefixIcon;
   final Widget? suffixIcon;
   final String? Function(String?)? validator;
+  final bool enabled;
 
   const GlanceTextField({
     super.key,
@@ -21,6 +22,7 @@ class GlanceTextField extends StatelessWidget {
     this.prefixIcon,
     this.suffixIcon,
     this.validator,
+    this.enabled = true,
   });
 
   @override
@@ -39,6 +41,7 @@ class GlanceTextField extends StatelessWidget {
           controller: controller,
           obscureText: obscureText,
           keyboardType: keyboardType,
+          enabled: enabled,
           style: GlanceTheme.bodyLarge.copyWith(color: GlanceTheme.textPrimary),
           validator: validator,
           decoration: InputDecoration(

@@ -157,6 +157,81 @@ Verify system functionality, database access permissions, and overall applicatio
 
 ---
 
+## Phase 7: Group Creation & Join UI Entries
+
+Enable group management page navigations and empty-state guides.
+
+- [x] **Add homePageIndexProvider** `[High]`
+- [x] **Implement global navigation in home_screen.dart** `[High]`
+- [x] **Make Group Selector in camera_screen.dart interactive** `[High]`
+- [x] **Welcome overlay for users with no groups** `[High]`
+- [x] **Action buttons in group management screen** `[Medium]`
+
+---
+
+## Phase 8: Group Creation Hang & Timeout Recovery
+
+Resolve Firestore offline-first write freezes.
+
+- [x] **Added 15s write timeouts in firestore_service.dart** `[High]`
+- [x] **Status UI and TimeoutException catch in create_group_screen.dart** `[High]`
+- [x] **Catch TimeoutException in group_management_screen.dart** `[Medium]`
+
+---
+
+## Phase 9: Storage Upload Hang & Timeout Recovery
+
+Prevent storage upload UI freezes.
+
+- [x] **Added 60s upload timeouts in storage_service.dart** `[High]`
+- [x] **Timeout catch in uploadPhoto provider and error feedback** `[High]`
+
+---
+
+## Phase 10: Modernize Android Gradle Build & APK Compilation
+
+Update build settings for compilation compatibility.
+
+- [x] **Migrate settings.gradle and app/build.gradle to modern plugin DSL** `[High]`
+- [x] **Upgrade Android Gradle Plugin to 8.9.1 and compileSdk to 36** `[High]`
+- [x] **Upgrade Workmanager dependency to 0.9.0** `[High]`
+- [x] **Correct windowBackground styling XML namespaces** `[High]`
+
+---
+
+## Phase 11: Fix Camera Stretching & Timing Issues
+
+- [x] **Correct aspect ratio layout in camera_screen.dart** `[High]`
+- [x] **Adjust timeouts in firestore_service.dart and storage_service.dart** `[High]`
+
+---
+
+## Phase 12: Robust Camera Preview Scaling
+
+- [x] **FittedBox aspect ratio correction on camera preview** `[High]`
+- [x] **Compression timeouts added to prevent thread lock** `[High]`
+
+---
+
+## Phase 13: Aspect Ratio Lock & Database Write Timeouts
+
+- [x] **Locked camera preview aspect ratio using FittedBox + display ratio locked SizedBox** `[High]`
+- [x] **Add 15s write timeouts to createGroup, createInvite, and createPhoto in firestore_service.dart** `[High]`
+
+---
+
+## Phase 14: Profile Settings, Group Management, and Compliance
+
+Complete compliance items, profile customizability, group lifecycle control, and forgot password flows.
+
+- [x] **Add deleteAccount to AuthService in auth_service.dart** `[High]`
+- [x] **Implement Forgot Password recovery in login_screen.dart** `[Medium]`
+- [x] **Create profile_settings_screen.dart with name & avatar updates, logout, and deletion controls** `[High]`
+- [x] **Connect settings screen from group_management_screen.dart and add Leave Group and Delete Group actions** `[High]`
+- [x] **Verify that CI/CD runs and builds the release APK successfully** `[High]`
+
+---
+
 ## Notes & Constraints
 
 1. **iOS Widget Limit**: iOS background widget processes have a strict **30MB memory limit**. Keep downloaded image size small (target under 200KB, max bounding box of 1080x1080 JPEG) to avoid background memory jettons.

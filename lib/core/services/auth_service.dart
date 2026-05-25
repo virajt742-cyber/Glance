@@ -279,6 +279,33 @@ class AuthService {
     return results;
   }
 
+  // ─── Delete Account ────────────────────────────────────────────────
+  Future<void> deleteAccount() async {
+    final user = _auth.currentUser;
+    if (user == null) throw const AuthException('Not authenticated');
+    final uid = user.uid;
+
+    try {
+      // 1. Delete Firestore user document
+      await _firestore
+          .collection(AppConstants.usersCollection)
+          .doc(uid)
+          .delete()
+          .timeout(const Duration(seconds: 15));
+
+      // 2. Delete Firebase Auth user
+      await user.delete();
+    } on FirebaseAuthException catch (e) {
+      throw AuthException(
+        _mapFirebaseAuthError(e.code),
+        code: e.code,
+        originalError: e,
+      );
+    } catch (e) {
+      throw AuthException('Failed to delete account: ${e.toString()}', originalError: e);
+    }
+  }
+
   // ─── Password Reset ────────────────────────────────────────────────
   Future<void> resetPassword(String email) async {
     try {
@@ -295,6 +322,8 @@ class AuthService {
   // ─── Error Mapping ─────────────────────────────────────────────────
   String _mapFirebaseAuthError(String code) {
     switch (code) {
+      case 'requires-recent-login':
+        return 'For security reasons, this action requires you to log out and log back in before deleting your account.';
       case 'email-already-in-use':
         return 'An account with this email already exists';
       case 'invalid-email':

@@ -124,6 +124,31 @@ class StorageService {
     }
   }
 
+  Future<String> uploadProfilePhotoFromBytes({
+    required Uint8List imageBytes,
+    required String userId,
+  }) async {
+    try {
+      final storagePath =
+          '${AppConstants.profilePhotosPath}/$userId/profile/avatar.jpg';
+      final ref = _storage.ref().child(storagePath);
+
+      final metadata = SettableMetadata(
+        contentType: 'image/jpeg',
+        customMetadata: {'uploadedBy': userId, 'type': 'profile'},
+      );
+
+      await ref.putData(imageBytes, metadata).timeout(const Duration(seconds: 60));
+      return await ref.getDownloadURL().timeout(const Duration(seconds: 20));
+    } on FirebaseException catch (e) {
+      throw StorageException(
+        'Failed to upload profile photo: ${e.message}',
+        code: e.code,
+        originalError: e,
+      );
+    }
+  }
+
   Future<void> deletePhoto(String storageUrl) async {
     try {
       final ref = _storage.refFromURL(storageUrl);

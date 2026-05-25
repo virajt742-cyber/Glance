@@ -7,6 +7,7 @@ import 'package:gap/gap.dart';
 import 'package:glance_app/core/theme/glance_theme.dart';
 import 'package:glance_app/core/providers/providers.dart';
 import 'package:glance_app/features/group/screens/create_group_screen.dart';
+import 'package:glance_app/features/profile/screens/profile_settings_screen.dart';
 
 class GroupManagementScreen extends ConsumerStatefulWidget {
   const GroupManagementScreen({super.key});
@@ -19,12 +20,135 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
   final _joinCodeController = TextEditingController();
   bool _isJoining = false;
   bool _isGeneratingInvite = false;
+  bool _isModifyingGroup = false;
   String? _generatedInviteCode;
 
   @override
   void dispose() {
     _joinCodeController.dispose();
     super.dispose();
+  }
+
+  Future<void> _handleLeaveGroup(String groupId, String userId) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: GlanceTheme.surfaceElevated,
+        title: const Text('Leave Group'),
+        content: const Text('Are you sure you want to leave this group? You will no longer receive or share moments in this group.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel', style: TextStyle(color: GlanceTheme.textSecondary)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: GlanceTheme.error),
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Leave', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true || !mounted) return;
+
+    setState(() => _isModifyingGroup = true);
+
+    try {
+      final firestoreService = ref.read(firestoreServiceProvider);
+      await firestoreService.removeMemberFromGroup(groupId, userId);
+
+      // Select another group if available, otherwise set active group to null
+      final groups = ref.read(userGroupsProvider).value ?? [];
+      final remainingGroups = groups.where((g) => g.id != groupId).toList();
+
+      if (remainingGroups.isNotEmpty) {
+        ref.read(activeGroupIdProvider.notifier).state = remainingGroups.first.id;
+      } else {
+        ref.read(activeGroupIdProvider.notifier).state = null;
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Successfully left the group.'),
+            backgroundColor: GlanceTheme.success,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to leave group: $e'),
+            backgroundColor: GlanceTheme.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isModifyingGroup = false);
+    }
+  }
+
+  Future<void> _handleDeleteGroup(String groupId) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: GlanceTheme.surfaceElevated,
+        title: const Text('Delete Group', style: TextStyle(color: GlanceTheme.error)),
+        content: const Text('Are you sure you want to permanently delete this group? All shared moments and invite codes will be deleted. This cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel', style: TextStyle(color: GlanceTheme.textSecondary)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: GlanceTheme.error),
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Delete', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true || !mounted) return;
+
+    setState(() => _isModifyingGroup = true);
+
+    try {
+      final firestoreService = ref.read(firestoreServiceProvider);
+      await firestoreService.deleteGroup(groupId);
+
+      // Select another group if available, otherwise set active group to null
+      final groups = ref.read(userGroupsProvider).value ?? [];
+      final remainingGroups = groups.where((g) => g.id != groupId).toList();
+
+      if (remainingGroups.isNotEmpty) {
+        ref.read(activeGroupIdProvider.notifier).state = remainingGroups.first.id;
+      } else {
+        ref.read(activeGroupIdProvider.notifier).state = null;
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Group successfully deleted.'),
+            backgroundColor: GlanceTheme.success,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to delete group: $e'),
+            backgroundColor: GlanceTheme.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isModifyingGroup = false);
+    }
   }
 
   Future<void> _handleJoinGroup() async {
@@ -141,11 +265,21 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text('Groups', style: GlanceTheme.displayMedium),
-                  IconButton(
-                    icon: const Icon(Icons.add_circle_outline_rounded, color: GlanceTheme.primary, size: 28),
-                    onPressed: () => Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const CreateGroupScreen()),
-                    ),
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.settings_outlined, color: Colors.white, size: 26),
+                        onPressed: () => Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => const ProfileSettingsScreen()),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.add_circle_outline_rounded, color: GlanceTheme.primary, size: 28),
+                        onPressed: () => Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => const CreateGroupScreen()),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -384,6 +518,74 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
                               )
                             : Text(_generatedInviteCode == null ? 'Generate Code' : 'Generate New Code'),
                       ),
+                    ],
+                  ),
+                ),
+                
+                // ─── Group Settings (Leave / Delete) ───
+                const Gap(32),
+                Text(
+                  'Group Actions',
+                  style: GlanceTheme.titleMedium.copyWith(color: GlanceTheme.textSecondary),
+                ),
+                const Gap(12),
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: GlanceTheme.surfaceDark,
+                    borderRadius: BorderRadius.circular(GlanceTheme.radiusLg),
+                    border: Border.all(color: GlanceTheme.borderSubtle, width: 0.5),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (activeGroup.creatorId == ref.read(currentUserIdProvider)) ...[
+                        Text(
+                          'You are the owner of this group. Deleting the group will remove all members and delete all posts permanently.',
+                          style: GlanceTheme.bodyMedium,
+                        ),
+                        const Gap(20),
+                        ElevatedButton.icon(
+                          onPressed: _isModifyingGroup ? null : () => _handleDeleteGroup(activeGroup.id),
+                          icon: const Icon(Icons.delete_forever_rounded, color: Colors.white),
+                          label: _isModifyingGroup
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                )
+                              : const Text('Delete Group', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: GlanceTheme.error,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(GlanceTheme.radiusMd),
+                            ),
+                          ),
+                        ),
+                      ] else ...[
+                        Text(
+                          'You will lose access to all moments shared in this group once you leave.',
+                          style: GlanceTheme.bodyMedium,
+                        ),
+                        const Gap(20),
+                        ElevatedButton.icon(
+                          onPressed: _isModifyingGroup ? null : () => _handleLeaveGroup(activeGroup.id, ref.read(currentUserIdProvider)!),
+                          icon: const Icon(Icons.exit_to_app_rounded, color: Colors.white),
+                          label: _isModifyingGroup
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                )
+                              : const Text('Leave Group', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: GlanceTheme.error,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(GlanceTheme.radiusMd),
+                            ),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
