@@ -42,40 +42,40 @@ class DefaultFirebaseOptions {
   // ──────────────────────────────────────────────────────────────────────
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyBrSudz-rDYL-osmt4Qdao8HpZfzASFhsw',
-    appId: '1:215701464195:web:670c00dee5dfee4fe1a7b6',
-    messagingSenderId: '215701464195',
-    projectId: 'glance-2f9b3',
-    authDomain: 'glance-2f9b3.firebaseapp.com',
-    storageBucket: 'glance-2f9b3.firebasestorage.app',
-    measurementId: 'G-1S4NBN4YNF',
+    apiKey: 'YOUR_WEB_API_KEY',
+    appId: 'YOUR_WEB_APP_ID',
+    messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
+    projectId: 'YOUR_PROJECT_ID',
+    authDomain: 'YOUR_PROJECT_ID.firebaseapp.com',
+    storageBucket: 'YOUR_PROJECT_ID.firebasestorage.app',
+    measurementId: 'YOUR_WEB_MEASUREMENT_ID',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyB53OSG5d9UQNu9oIolSsMUC6TOAS2aBhU',
-    appId: '1:215701464195:android:26e9fe231178a8cce1a7b6',
-    messagingSenderId: '215701464195',
-    projectId: 'glance-2f9b3',
-    storageBucket: 'glance-2f9b3.firebasestorage.app',
+    apiKey: 'YOUR_ANDROID_API_KEY',
+    appId: 'YOUR_ANDROID_APP_ID',
+    messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
+    projectId: 'YOUR_PROJECT_ID',
+    storageBucket: 'YOUR_PROJECT_ID.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyCOHRel3vgI1o_CdPeZ_AXYX2fDNGFVats',
-    appId: '1:215701464195:ios:3dc3af42702a8ccfe1a7b6',
-    messagingSenderId: '215701464195',
-    projectId: 'glance-2f9b3',
-    storageBucket: 'glance-2f9b3.firebasestorage.app',
+    apiKey: 'YOUR_IOS_API_KEY',
+    appId: 'YOUR_IOS_APP_ID',
+    messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
+    projectId: 'YOUR_PROJECT_ID',
+    storageBucket: 'YOUR_PROJECT_ID.firebasestorage.app',
     iosBundleId: 'com.glance.app',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyBrSudz-rDYL-osmt4Qdao8HpZfzASFhsw',
-    appId: '1:215701464195:web:4ca33c333b63c5c0e1a7b6',
-    messagingSenderId: '215701464195',
-    projectId: 'glance-2f9b3',
-    authDomain: 'glance-2f9b3.firebaseapp.com',
-    storageBucket: 'glance-2f9b3.firebasestorage.app',
-    measurementId: 'G-NZF97LN5C3',
+    apiKey: 'YOUR_WINDOWS_API_KEY',
+    appId: 'YOUR_WINDOWS_APP_ID',
+    messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
+    projectId: 'YOUR_PROJECT_ID',
+    authDomain: 'YOUR_PROJECT_ID.firebaseapp.com',
+    storageBucket: 'YOUR_PROJECT_ID.firebasestorage.app',
+    measurementId: 'YOUR_WINDOWS_MEASUREMENT_ID',
   );
 
 }

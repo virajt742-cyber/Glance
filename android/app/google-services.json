@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "215701464195",
-    "project_id": "glance-2f9b3",
-    "storage_bucket": "glance-2f9b3.firebasestorage.app"
+    "project_number": "YOUR_PROJECT_NUMBER",
+    "project_id": "YOUR_PROJECT_ID",
+    "storage_bucket": "YOUR_PROJECT_ID.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:215701464195:android:26e9fe231178a8cce1a7b6",
+        "mobilesdk_app_id": "YOUR_ANDROID_APP_ID",
         "android_client_info": {
           "package_name": "com.glance.app"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyB53OSG5d9UQNu9oIolSsMUC6TOAS2aBhU"
+          "current_key": "YOUR_ANDROID_API_KEY"
         }
       ],
       "services": {
