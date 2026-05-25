@@ -33,6 +33,8 @@ class FirestoreService {
       createdAt: DateTime.now(),
     );
 
+    // ERROR FIX: Added a defensive 15-second timeout on docRef.set() to prevent infinite UI hangs
+    // when Cloud Firestore is not created, is in Locked Mode, or rules block the write on the server.
     await docRef.set(group.toCreateJson()).timeout(const Duration(seconds: 15));
     return group;
   }
@@ -153,6 +155,8 @@ class FirestoreService {
       reactionEmojiMap: {},
     );
 
+    // ERROR FIX: Added a defensive 15-second timeout on docRef.set() to prevent infinite UI hangs
+    // during the "Saving to database..." step when Firestore is offline, locked, or rules block the write.
     await docRef.set(photo.toCreateJson()).timeout(const Duration(seconds: 15));
     return photo;
   }
@@ -311,6 +315,8 @@ class FirestoreService {
       createdAt: DateTime.now(),
     );
 
+    // ERROR FIX: Added a defensive 15-second timeout on docRef.set() to prevent infinite UI hangs
+    // during the "Generate Code" step when Firestore is offline, locked, or rules block the write on the server.
     await docRef.set(invite.toCreateJson()).timeout(const Duration(seconds: 15));
     return invite;
   }

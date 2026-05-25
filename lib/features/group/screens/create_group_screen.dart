@@ -74,6 +74,9 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
         );
         Navigator.of(context).pop();
       }
+    // ERROR FIX: Inform the user to check their Firebase Console database setup when write times out.
+    // In FlutterFire, if a write is blocked by security rules (or if the DB doesn't exist),
+    // and offline persistence is active, the Future hangs indefinitely. A timeout handles this gracefully.
     } on TimeoutException {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

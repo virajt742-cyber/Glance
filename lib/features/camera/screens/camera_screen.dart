@@ -271,6 +271,10 @@ class _CameraScreenState extends ConsumerState<CameraScreen> with WidgetsBinding
                   fit: BoxFit.cover,
                   child: Builder(
                     builder: (context) {
+                      // ERROR FIX: Replaced manual Transform.scale math which scaled a stretched layout.
+                      // Here, we lock the SizedBox to the exact aspect ratio of the camera feed (displayRatio),
+                      // preventing any vertical or horizontal stretching of the camera preview.
+                      // Then, FittedBox(fit: BoxFit.cover) handles uniform fullscreen scaling and cropping.
                       final cameraRatio = _cameraController!.value.aspectRatio;
                       final displayRatio = cameraRatio > 1 ? 1 / cameraRatio : cameraRatio;
                       return SizedBox(

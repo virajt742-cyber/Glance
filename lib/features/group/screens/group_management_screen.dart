@@ -55,6 +55,7 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
           ),
         );
       }
+    // ERROR FIX: Catch TimeoutException during join group and guide user to verify Firestore console setup.
     } on TimeoutException {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -95,6 +96,7 @@ class _GroupManagementScreenState extends ConsumerState<GroupManagementScreen> {
       });
     } catch (e) {
       if (mounted) {
+        // ERROR FIX: Inform the user to check their Firebase Console database setup when invite code generation times out.
         final isTimeout = e is TimeoutException || e.toString().contains('TimeoutException');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

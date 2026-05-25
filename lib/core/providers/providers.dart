@@ -270,6 +270,8 @@ class UploadNotifier extends StateNotifier<UploadState> {
       return true;
     } catch (e) {
       final isTimeout = e is TimeoutException || e.toString().contains('TimeoutException');
+      // ERROR FIX: Catching "object-not-found" or "bucket-not-found" (which GCS returns as 404/not found)
+      // to let the user know their Storage bucket hasn't been created/enabled in the Firebase Console yet.
       final isObjectNotFound = e.toString().contains('object-not-found') || 
                                e.toString().contains('ObjectNotFound') ||
                                e.toString().contains('bucket-not-found');
